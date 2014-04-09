@@ -12,6 +12,12 @@ var Generator = module.exports = function Generator() {
   } catch (e) {
     this.appname = path.basename(process.cwd());
   }
+
+  try {
+    this.mainFile = require(path.join(process.cwd(), 'bower.json')).main;
+  } catch (e) {
+    this.mainFile = "index.html";
+  }
   this.appname = this._.slugify(this._.humanize(this.appname));
   this.scriptAppName = this._.camelize(this.appname) + angularUtils.appName(this);
 
@@ -83,7 +89,7 @@ Generator.prototype.htmlTemplate = function (src, dest) {
 Generator.prototype.addScriptToIndex = function (script) {
   try {
     var appPath = this.env.options.appPath;
-    var fullPath = path.join(appPath, 'index.html');
+    var fullPath = path.join(appPath, this.mailFile);
     angularUtils.rewriteFile({
       file: fullPath,
       needle: '<!-- endbuild -->',
