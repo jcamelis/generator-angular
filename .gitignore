@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-test/temp
+test/tmp
 test/UpperCaseBug
 test/routeTests
 nbproject
