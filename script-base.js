@@ -19,6 +19,19 @@ var Generator = module.exports = function Generator() {
   } catch (e) {
     this.mainFile = "index.html";
   }
+
+  try {
+    this.scriptPath = require(path.join(process.cwd(), 'bower.json')).scriptPath;
+  } catch (e) {
+    this.scriptPath = "scripts";
+  }
+
+  try {
+    this.scriptPathSrc = require(path.join(process.cwd(), 'bower.json')).scriptPathSrc;
+  } catch (e) {
+    this.scriptPathSrc = this.scriptPath;
+  }
+
   this.appname = this._.slugify(this._.humanize(this.appname));
   this.scriptAppName = this._.camelize(this.appname) + angularUtils.appName(this);
 
@@ -96,19 +109,15 @@ Generator.prototype.htmlTemplate = function (src, dest) {
 Generator.prototype.addScriptToIndex = function (script) {
   try {
     var appPath = this.env.options.appPath;
-    var mainFile = "";
-    try {
-      mainFile = require(path.join(process.cwd(), 'bower.json')).main;
-    } catch(e) {
-      mainFile = "index.html";
-    }
+    var mainFile = this.mainFile;
+    var scriptPathSrc = this.scriptPathSrc;
 
     var fullPath = path.join(appPath, mainFile);
     angularUtils.rewriteFile({
       file: fullPath,
       needle: '<!-- endbuild -->',
       splicable: [
-        '<script src="scripts/' + script.toLowerCase().replace(/\\/g, '/') + '.js"></script>'
+        '<script src="' + scriptPathSrc + '/' + script.toLowerCase().replace(/\\/g, '/') + '.js"></script>'
       ]
     });
   } catch (e) {
@@ -124,7 +133,9 @@ Generator.prototype.generateSourceAndTest = function (appTemplate, testTemplate,
     this.cameledName = this.classedName;
   }
 
-  this.appTemplate(appTemplate, path.join('scripts', targetDirectory, this.name));
+  var scriptPath = this.scriptPath;
+
+  this.appTemplate(appTemplate, path.join(scriptPath, targetDirectory, this.name));
   this.testTemplate(testTemplate, path.join(targetDirectory, this.name));
   if (!skipAdd) {
     this.addScriptToIndex(path.join(targetDirectory, this.name));
